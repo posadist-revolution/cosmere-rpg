@@ -17,6 +17,11 @@ export const SETTINGS = {
     SHEET_EXPAND_DESCRIPTION_DEFAULT: 'expandDescriptionByDefault',
     SHEET_EXPAND_SECTIONS_DEFAULT: 'expandSectionsByDefault',
     SHEET_SKILL_INCDEC_TOGGLE: 'skillIncrementDecrementToggle',
+    AUTOMATION_TOKEN_FLAGS_BARS: 'defaultTokenAutomationBars',
+    AUTOMATION_TOKEN_FLAGS_SIGHT: 'defaultTokenAutomationSight',
+    AUTOMATION_TOKEN_FLAGS_SIZE: 'defaultTokenAutomationSize',
+    TOKEN_DEFAULT_BAR_1_VAL: 'defaultTokenBar1Value',
+    TOKEN_DEFAULT_BAR_2_VAL: 'defaultTokenBar2Value',
     SYSTEM_THEME: 'systemTheme',
 } as const;
 
@@ -42,6 +47,16 @@ type SystemSettingsConfig = {
     [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.SHEET_EXPAND_SECTIONS_DEFAULT}`]: boolean;
 } & {
     [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.SHEET_SKILL_INCDEC_TOGGLE}`]: boolean;
+} & {
+    [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.AUTOMATION_TOKEN_FLAGS_BARS}`]: boolean;
+} & {
+    [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.AUTOMATION_TOKEN_FLAGS_SIGHT}`]: boolean;
+} & {
+    [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.AUTOMATION_TOKEN_FLAGS_SIZE}`]: boolean;
+} & {
+    [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.TOKEN_DEFAULT_BAR_1_VAL}`]: string;
+} & {
+    [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.TOKEN_DEFAULT_BAR_2_VAL}`]: string;
 } & { [key in `${typeof SYSTEM_ID}.${typeof SETTINGS.SYSTEM_THEME}`]: Theme };
 
 type SystemSettingKey = (typeof SETTINGS)[keyof typeof SETTINGS];
@@ -52,6 +67,12 @@ export const enum TargetingOptions {
     SelectedAndTargeted = 2,
     PrioritiseSelected = 3,
     PrioritiseTargeted = 4,
+}
+
+export const enum TokenBarOptions {
+    health = `resources.hea`,
+    focus = `resources.foc`,
+    investiture = `resources.inv`,
 }
 
 /**
@@ -74,6 +95,71 @@ export function registerSystemSettings() {
         type: String,
     });
 
+    // AUTOMATION SETTINGS
+    const automationOptions = [
+        {
+            name: SETTINGS.AUTOMATION_TOKEN_FLAGS_BARS,
+            default: true,
+            scope: 'client',
+        },
+        {
+            name: SETTINGS.AUTOMATION_TOKEN_FLAGS_SIGHT,
+            default: true,
+            scope: 'client',
+        },
+        {
+            name: SETTINGS.AUTOMATION_TOKEN_FLAGS_SIZE,
+            default: true,
+            scope: 'client',
+        },
+    ];
+
+    automationOptions.forEach((option) => {
+        game.settings.register(SYSTEM_ID, option.name, {
+            name: game.i18n.localize(`SETTINGS.${option.name}.name`),
+            hint: game.i18n.localize(`SETTINGS.${option.name}.hint`),
+            scope: option.scope as 'client' | 'world' | undefined,
+            config: true,
+            type: Boolean,
+            default: option.default,
+        });
+    });
+
+    // TOKEN SETTINGS
+    const tokenOptions = [
+        {
+            name: SETTINGS.TOKEN_DEFAULT_BAR_1_VAL,
+            default: TokenBarOptions.health,
+            scope: 'client',
+        },
+        {
+            name: SETTINGS.TOKEN_DEFAULT_BAR_2_VAL,
+            default: TokenBarOptions.focus,
+            scope: 'client',
+        },
+    ];
+
+    tokenOptions.forEach((option) => {
+        game.settings.register(SYSTEM_ID, option.name, {
+            name: game.i18n.localize(`SETTINGS.${option.name}.name`),
+            hint: game.i18n.localize(`SETTINGS.${option.name}.hint`),
+            scope: option.scope as 'client' | 'world' | undefined,
+            config: true,
+            type: String,
+            default: option.default,
+            choices: {
+                [TokenBarOptions.health]: game.i18n.localize(
+                    `COSMERE.Actor.Resource.Health`,
+                ),
+                [TokenBarOptions.focus]: game.i18n.localize(
+                    `COSMERE.Actor.Resource.Focus`,
+                ),
+                [TokenBarOptions.investiture]: game.i18n.localize(
+                    `COSMERE.Actor.Resource.Investiture`,
+                ),
+            },
+        });
+    });
     // SHEET SETTINGS
     const sheetOptions = [
         {
