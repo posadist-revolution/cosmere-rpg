@@ -38,7 +38,7 @@ import { Derived } from '@system/data/fields';
 
 import { d20Roll, D20Roll, D20RollData, DamageRoll } from '@system/dice';
 
-import { AttributeScale } from '@system/types/config';
+import { AttributeScale, sizeToTokenDimensions } from '@system/types/config';
 import { CosmereHooks } from '@system/types/hooks';
 
 // Dialogs
@@ -314,7 +314,56 @@ export class CosmereActor<
             });
         }
 
-        this.updateSource({ prototypeToken });
+        // Set bars to default to health and focus, viewed when hovered by owner
+        foundry.utils.mergeObject(prototypeToken, {
+            displayBars: CONST.TOKEN_DISPLAY_MODES.OWNER_HOVER,
+            bar1: {
+                attribute: `resources.hea`,
+            },
+            bar2: {
+                attribute: `resources.foc`,
+            },
+        });
+
+        // Size in grid spaces
+        const prototypeTokenSize = sizeToTokenDimensions(
+            this.system.size as Size,
+        );
+
+        foundry.utils.mergeObject(prototypeToken, {
+            width: prototypeTokenSize,
+            height: prototypeTokenSize,
+        });
+
+        // Senses changes
+        const sensesData = this.system.senses;
+
+        const affectedByObscuredSenses = sensesData?.obscuredAffected ?? true;
+        foundry.utils.mergeObject(prototypeToken, {
+            sight: {
+                range: affectedByObscuredSenses
+                    ? sensesData.range?.value
+                    : null,
+                visionMode: 'sense',
+            },
+        });
+
+        // Configure default actor flags
+        const flags = {
+            [SYSTEM_ID]: {
+                automation: {
+                    token: {
+                        vision: true,
+                        size: true,
+                    },
+                },
+                sheet: {
+                    hideUnranked: true,
+                },
+            },
+        };
+
+        this.updateSource({ prototypeToken, flags });
     }
 
     public override async createEmbeddedDocuments<
@@ -1410,12 +1459,17 @@ declare module '@league-of-foundry-developers/foundry-vtt-types/configuration' {
     interface FlagConfig {
         Actor: {
             'cosmere-rpg': {
+                automation: object;
+                'automation.token': object;
+                'automation.token.vision': boolean;
+                'automation.token.size': boolean;
                 sheet: object;
                 'sheet.mode': 'edit' | 'view';
                 'sheet.expertisesCollapsed': boolean;
                 'sheet.immunitiesCollapsed': boolean;
                 'sheet.skillsCollapsed': boolean;
                 'sheet.hideUnranked': boolean;
+                'sheet.autosetPrototypeTokenValues': boolean;
                 goals: object;
                 'goals.hide-completed': boolean;
                 [key: `meta.update.mode.${string}`]: string;
