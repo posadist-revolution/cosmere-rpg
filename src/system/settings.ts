@@ -73,6 +73,7 @@ export const enum TokenBarOptions {
     health = `resources.hea`,
     focus = `resources.foc`,
     investiture = `resources.inv`,
+    none = ``,
 }
 
 /**
@@ -157,9 +158,11 @@ export function registerSystemSettings() {
                 [TokenBarOptions.investiture]: game.i18n.localize(
                     `COSMERE.Actor.Resource.Investiture`,
                 ),
+                [TokenBarOptions.none]: game.i18n.localize(`GENERIC.None`),
             },
         });
     });
+
     // SHEET SETTINGS
     const sheetOptions = [
         {
