@@ -48,6 +48,7 @@ import {
 
 import { CosmereItem } from '@system/documents/item';
 import { CosmereActor } from '../documents';
+import { RoundStageData } from '../documents/round-stage';
 
 export interface SizeConfig {
     label: string;
@@ -544,5 +545,9 @@ export interface CosmereRPGConfig {
                 };
             };
         };
+    };
+
+    combat: {
+        stages: Record<string, RoundStageData>;
     };
 }
