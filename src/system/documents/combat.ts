@@ -1,5 +1,5 @@
 import { TurnSpeed } from '@system/types/cosmere';
-
+import { RoundStage } from './round-stage';
 import { CosmereCombatant } from './combatant';
 
 // Constants
@@ -14,12 +14,38 @@ export class CosmereCombat extends Combat {
         this.turns.forEach((combatant) => void combatant.resetActivation());
     }
 
+    /**
+     * Generates the round stages from config, and populates them with an empty combatant array.
+     */
+    roundStages: Record<string, RoundStage> = RoundStage.getInitialStages();
+
+    public get currentStage(): RoundStage {
+        return this.stage ?? Object.values(this.roundStages)[0];
+    }
+
+    public set currentStage(stage) {
+        this.stage = stage;
+    }
+
+    private stage: RoundStage | undefined;
+
+    public async updateStageParticipants() {
+        for (const stage of Object.values(this.roundStages)) {
+            stage.updateParticipants(this.turns);
+            await Promise.resolve();
+        }
+        return Promise.resolve();
+    }
+
     override async startCombat(): Promise<this> {
         this.resetActivations();
         this._playCombatSound('startEncounter');
-        const updateData = { round: 1, turn: null };
-        //@ts-expect-error: FVTT Types expects the combatStart hook to never have a "null" turn, but
-        // with the Cosmere RPG, having a null turn at start of combat makes sense.
+        await this.updateStageParticipants();
+
+        const updateData = {
+            round: 1,
+            turn: this.turns.indexOf(this.currentStage.participants[0]),
+        };
         Hooks.callAll('combatStart', this, updateData);
         await this.update(updateData);
         return this;
@@ -27,9 +53,13 @@ export class CosmereCombat extends Combat {
 
     override async nextRound(): Promise<this> {
         this.resetActivations();
+        await this.updateStageParticipants();
 
         // Ensure that at the start of the round, it's no combatant's turn
-        await this.update({ round: this.round, turn: null });
+        await this.update({
+            round: this.round,
+            turn: this.turns.indexOf(this.currentStage.participants[0]),
+        });
 
         return super.nextRound();
     }
