@@ -145,19 +145,21 @@ export class CosmereCombatTracker extends foundry.applications.sidebar.tabs
     ) {
         event.preventDefault();
         event.stopPropagation();
+        const combat = this.viewed;
+        if (!combat) return;
 
         // Get the button and the closest combatant list item
         const btn = event.target as HTMLElement;
         const li = btn.closest<HTMLElement>('.combatant')!;
 
         // Get the combatant
-        const combatant = this.viewed!.combatants.get(li.dataset.combatantId!)!;
+        const combatant = combat.combatants.get(li.dataset.combatantId!)!;
 
         // Mark the combatant as activated
         void combatant.markActivated();
 
         // Set the current turn to this combatant
-        void this.viewed?.setCurrentTurnFromCombatant(combatant);
+        void combat.setCurrentTurnFromCombatant(combatant);
     }
 
     /**

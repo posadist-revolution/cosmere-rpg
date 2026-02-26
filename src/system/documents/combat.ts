@@ -20,14 +20,18 @@ export class CosmereCombat extends Combat {
     roundStages: Record<string, RoundStage> = RoundStage.getInitialStages();
 
     public get currentStage(): RoundStage {
-        return this.stage ?? Object.values(this.roundStages)[0];
+        return this.stage
+            ? this.roundStages[this.stage]
+            : Object.values(this.roundStages)[0];
     }
 
     public set currentStage(stage) {
-        this.stage = stage;
+        this.stage = Object.keys(this.roundStages)[
+            Object.values(this.roundStages).indexOf(stage)
+        ];
     }
 
-    private stage: RoundStage | undefined;
+    private stage: string | undefined;
 
     public async updateStageParticipants() {
         for (const stage of Object.values(this.roundStages)) {
@@ -44,7 +48,7 @@ export class CosmereCombat extends Combat {
 
         const updateData = {
             round: 1,
-            turn: this.turns.indexOf(this.currentStage.participants[0]),
+            turn: this.turns.indexOf(this.currentStage.currentParticipant),
         };
         Hooks.callAll('combatStart', this, updateData);
         await this.update(updateData);
@@ -56,10 +60,13 @@ export class CosmereCombat extends Combat {
         await this.updateStageParticipants();
 
         // Ensure that at the start of the round, it's no combatant's turn
-        await this.update({
+        const updateData = {
             round: this.round,
-            turn: this.turns.indexOf(this.currentStage.participants[0]),
-        });
+            turn: this.getCombatantIndex(
+                this.currentStage.currentParticipant.id!,
+            ),
+        };
+        await this.update(updateData);
 
         return super.nextRound();
     }
@@ -80,7 +87,12 @@ export class CosmereCombat extends Combat {
                 this.turn + 1,
             );
         } else advanceTime = 0;
-        const updateData = { round: this.round, turn: null };
+        const updateData = {
+            round: this.round,
+            turn: this.getCombatantIndex(
+                this.currentStage.currentParticipant.id!,
+            ),
+        };
         const updateOptions: Combat.Database.UpdateOperation = {
             direction: 1,
             worldTime: { delta: advanceTime },
@@ -109,9 +121,7 @@ export class CosmereCombat extends Combat {
 
         // Update state tracking
         if (currTurnId) {
-            this.turn = turns.findIndex((combatant) => {
-                return combatant.id == currTurnId;
-            });
+            this.turn = this.getCombatantIndex(currTurnId);
             const c = turns[this.turn];
             this.current = this._getCurrentState(c);
         }
@@ -166,10 +176,14 @@ export class CosmereCombat extends Combat {
     }
 
     public async setCurrentTurnFromCombatant(combatant: CosmereCombatant) {
-        const turnIndex = this.turns.indexOf(combatant);
+        const turnIndex = this.getCombatantIndex(combatant.id!);
 
         if (turnIndex !== -1) {
-            const updateData = { round: this.round, turn: turnIndex };
+            const updateData = {
+                round: this.round,
+                turn: turnIndex,
+            };
+            this.currentStage.currentParticipant = combatant;
             const updateOptions = {
                 advanceTime: 0,
                 direction: 1,
@@ -180,6 +194,12 @@ export class CosmereCombat extends Combat {
                 updateOptions as Combat.Database.UpdateOperation,
             );
         }
+    }
+
+    public getCombatantIndex(combatantId: string) {
+        return this.turns.findIndex((combatant) => {
+            return combatant.id == combatantId;
+        });
     }
 }
 
