@@ -34,6 +34,7 @@ import {
     MovementType,
     ImmunityType,
     ActorType,
+    TurnSpeed,
 } from './cosmere';
 import { AdvantageMode } from './roll';
 
@@ -46,8 +47,17 @@ import {
     DynamicItemListSectionGenerator,
 } from './application/actor/components/item-list';
 
-import { CosmereItem } from '@system/documents/item';
-import { CosmereActor } from '../documents';
+import { CosmereItem, CosmereActor, CosmereCombatant } from '@system/documents';
+
+export type CombatantInStageFunc = (
+    combatant: CosmereCombatant,
+) => Promise<boolean>;
+
+export interface RoundStageConfig {
+    stageSpeed?: TurnSpeed;
+    stageActorType?: ActorType;
+    combatantInStageFunc?: CombatantInStageFunc;
+}
 
 export interface SizeConfig {
     label: string;
@@ -399,6 +409,10 @@ export interface RollDataConfig {
 }
 
 export interface CosmereRPGConfig {
+    combat: {
+        stages: Record<string, RoundStageConfig>;
+    };
+
     themes: Record<Theme, string>;
     sizes: Record<Size, SizeConfig>;
     creatureTypes: Record<CreatureType, CreatureTypeConfig>;

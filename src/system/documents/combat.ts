@@ -1,11 +1,84 @@
-import { TurnSpeed } from '@system/types/cosmere';
+import { ActorType, RoundStageName, TurnSpeed } from '@system/types/cosmere';
 
 import { CosmereCombatant } from './combatant';
 
 // Constants
 import { SYSTEM_ID } from '@system/constants';
+import { CombatantInStageFunc, RoundStageConfig } from '../types/config';
+
+export class RoundStage {
+    stageSpeed?: TurnSpeed;
+    stageActorType?: ActorType;
+    combatantInStageFunc?: CombatantInStageFunc;
+    public participants: CosmereCombatant[];
+    private combat: CosmereCombat;
+    constructor(combat: CosmereCombat, config: RoundStageConfig) {
+        this.combat = combat;
+        this.stageSpeed = config.stageSpeed;
+        this.stageActorType = config.stageActorType;
+        this.combatantInStageFunc = config.combatantInStageFunc;
+        this.participants = [];
+    }
+    public async updateParticipants() {
+        this.participants = this.combat.turns.filter(async (combatant) => {
+            let isInRound = false;
+            // If this stage has a defined "Is in stage" function, use that instead of speed/actor type
+            if (this.combatantInStageFunc) {
+                return await this.combatantInStageFunc(combatant);
+            }
+
+            // Check if this combatant matches this round's speed
+            if (this.stageSpeed) {
+                isInRound =
+                    isInRound && combatant.turnSpeed === this.stageSpeed;
+            }
+
+            // Check if this combatant matches this round's actor type
+            if (this.stageActorType) {
+                isInRound =
+                    isInRound && combatant.actor.type === this.stageActorType;
+            }
+
+            return isInRound;
+        });
+        await Promise.resolve();
+    }
+}
 
 export class CosmereCombat extends Combat {
+    private stage: RoundStage | undefined;
+
+    /**
+     * Generates the round stages from config, and populates them with an empty combatant array.
+     */
+    roundStages: Record<string, RoundStage> = Object.keys(
+        CONFIG.COSMERE.combat.stages,
+    ).reduce(
+        (prev: Record<string, RoundStage>, curr: string) => {
+            const stage = CONFIG.COSMERE.combat.stages[curr];
+            prev[curr] = new RoundStage(
+                this,
+                CONFIG.COSMERE.combat.stages[curr],
+            );
+            return prev;
+        },
+        {} as Record<string, RoundStage>,
+    );
+
+    public get currentStage(): RoundStage {
+        return this.stage ?? Object.values(this.roundStages)[0];
+    }
+
+    public set currentStage(stage) {
+        this.stage = stage;
+    }
+
+    public async updateStageParticipants() {
+        for (const stage of Object.values(this.roundStages)) {
+            await stage.updateParticipants();
+        }
+    }
+
     /**
      * Sets all defeated combatants activation status to true (already activated),
      * and all others to false (hasn't activated yet)
@@ -17,9 +90,12 @@ export class CosmereCombat extends Combat {
     override async startCombat(): Promise<this> {
         this.resetActivations();
         this._playCombatSound('startEncounter');
-        const updateData = { round: 1, turn: null };
-        //@ts-expect-error: FVTT Types expects the combatStart hook to never have a "null" turn, but
-        // with the Cosmere RPG, having a null turn at start of combat makes sense.
+        await this.updateStageParticipants();
+
+        const updateData = {
+            round: 1,
+            turn: this.turns.indexOf(this.currentStage.participants[0]),
+        };
         Hooks.callAll('combatStart', this, updateData);
         await this.update(updateData);
         return this;
@@ -31,6 +107,7 @@ export class CosmereCombat extends Combat {
         // Ensure that at the start of the round, it's no combatant's turn
         await this.update({ round: this.round, turn: null });
 
+        // super.nextRound() handles worldtime updates, so we don't need to worry about this
         return super.nextRound();
     }
 
@@ -109,6 +186,7 @@ export class CosmereCombat extends Combat {
             };
             void (await this.createLinkedCombatants(combatant, [createData]));
         }
+        void (await this.updateStageParticipants());
     }
 
     async createLinkedCombatants(

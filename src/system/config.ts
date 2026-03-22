@@ -34,12 +34,35 @@ import {
     Theme,
     MovementType,
     ImmunityType,
+    ActorType,
+    TurnSpeed,
+    RoundStageName,
 } from './types/cosmere';
 import { AdvantageMode } from './types/roll';
 
 import { Talent, TalentTree } from './types/item';
 
 const COSMERE: CosmereRPGConfig = {
+    combat: {
+        stages: {
+            [RoundStageName.FastCharacters]: {
+                stageActorType: ActorType.Character,
+                stageSpeed: TurnSpeed.Fast,
+            },
+            [RoundStageName.FastAdversaries]: {
+                stageActorType: ActorType.Adversary,
+                stageSpeed: TurnSpeed.Fast,
+            },
+            [RoundStageName.SlowCharacters]: {
+                stageActorType: ActorType.Character,
+                stageSpeed: TurnSpeed.Slow,
+            },
+            [RoundStageName.SlowAdversaries]: {
+                stageActorType: ActorType.Adversary,
+                stageSpeed: TurnSpeed.Slow,
+            },
+        },
+    },
     sizes: {
         [Size.Small]: {
             label: 'COSMERE.Actor.Size.Small',
