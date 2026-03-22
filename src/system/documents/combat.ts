@@ -41,6 +41,7 @@ export class RoundStage {
 
             return isInRound;
         });
+        // Included to avoid eslint error from "Function has no await"
         await Promise.resolve();
     }
 }
