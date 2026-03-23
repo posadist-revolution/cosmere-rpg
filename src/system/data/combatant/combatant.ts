@@ -28,6 +28,13 @@ const SCHEMA = () => ({
         new foundry.data.fields.StringField(),
         { required: false },
     ),
+
+    /**
+     * What special roundStage this combatant was created for, if any
+     */
+    forcedRoundStage: new foundry.data.fields.StringField({
+        required: false,
+    }),
 });
 
 export type CombatantDataSchema = ReturnType<typeof SCHEMA>;

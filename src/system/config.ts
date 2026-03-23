@@ -36,6 +36,7 @@ import {
     ImmunityType,
     ActorType,
     TurnSpeed,
+    RoundStageName,
 } from './types/cosmere';
 import { AdvantageMode } from './types/roll';
 
@@ -1159,24 +1160,28 @@ const COSMERE: CosmereRPGConfig = {
     },
 
     combat: {
-        stages: {
-            'fast-characters': {
+        stages: [
+            {
+                stageName: RoundStageName.FastCharacters,
                 stageActorType: ActorType.Character,
                 stageSpeed: TurnSpeed.Fast,
             },
-            'fast-adversaries': {
+            {
+                stageName: RoundStageName.FastAdversaries,
                 stageActorType: ActorType.Adversary,
                 stageSpeed: TurnSpeed.Fast,
             },
-            'slow-characters': {
+            {
+                stageName: RoundStageName.SlowCharacters,
                 stageActorType: ActorType.Character,
                 stageSpeed: TurnSpeed.Slow,
             },
-            'slow-adversaries': {
+            {
+                stageName: RoundStageName.SlowAdversaries,
                 stageActorType: ActorType.Adversary,
                 stageSpeed: TurnSpeed.Slow,
             },
-        },
+        ],
     },
 };
 

@@ -311,3 +311,14 @@ export const enum TurnSpeed {
 export const enum Theme {
     Default = 'default',
 }
+
+/**
+ * A non-exhaustive list of round stages
+ * Used to provide default options
+ */
+export const enum RoundStageName {
+    FastCharacters = 'fast-characters',
+    FastAdversaries = 'fast-adversaries',
+    SlowCharacters = 'slow-characters',
+    SlowAdversaries = 'slow-adversaries',
+}

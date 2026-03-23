@@ -6,6 +6,7 @@ import { CosmereCombatant } from './combatant';
 import { SYSTEM_ID } from '@system/constants';
 
 export class CosmereCombat extends Combat {
+    private stage?: string;
     /**
      * Sets all defeated combatants activation status to true (already activated),
      * and all others to false (hasn't activated yet)
@@ -31,14 +32,21 @@ export class CosmereCombat extends Combat {
         ];
     }
 
-    private stage: string | undefined;
-
     public async updateStageParticipants() {
         for (const stage of Object.values(this.roundStages)) {
+            const missingParticipants = await stage.missingParticipants(
+                this.turns,
+            );
+            if (missingParticipants) {
+                for (const newTurnInfo of missingParticipants) {
+                    void (await this.createLinkedCombatants(
+                        newTurnInfo.sourceCombatant,
+                        [newTurnInfo.createData],
+                    ));
+                }
+            }
             stage.updateParticipants(this.turns);
-            await Promise.resolve();
         }
-        return Promise.resolve();
     }
 
     override async startCombat(): Promise<this> {
@@ -149,6 +157,7 @@ export class CosmereCombat extends Combat {
             };
             void (await this.createLinkedCombatants(combatant, [createData]));
         }
+        void (await this.updateStageParticipants());
     }
 
     async createLinkedCombatants(
