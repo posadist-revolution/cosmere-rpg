@@ -61,7 +61,7 @@ const EVENTS: EventDefinition[] = [
     {
         type: 'use',
         hook: HOOKS.USE_ITEM,
-        filter: (item: CosmereItem) => item.isActivatable,
+        filter: (item: CosmereItem) => item.isAction(),
     },
     {
         type: 'mode-activate',
