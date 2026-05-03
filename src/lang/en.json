@@ -181,6 +181,13 @@
                     "MiscSectionName": "Miscellaneous Actions",
                     "NewItem": "Add {type}"
                 },
+                "Talents": {
+                    "label": "Talents",
+                    "Use": "Use Talent",
+                    "BaseSectionName": "{type} Talents",
+                    "MiscSectionName": "Miscellaneous Talents",
+                    "NewItem": "Add {type}"
+                },
                 "Equipment": {
                     "Quantity": "Quantity",
                     "Weight": "Weight",
@@ -241,6 +248,7 @@
                 "ImmuneTo": "Immune to {condition}",
                 "Tabs": {
                     "Details": "Details",
+                    "Talents": "Talents",
                     "Actions": "Actions",
                     "Equipment": "Equipment",
                     "Goals": "Goals",
@@ -248,15 +256,7 @@
                     "Effects": "Effects & Conditions"
                 },
                 "Search": {
-                    "Item": {
-                        "Placeholder": "Search actions"
-                    },
-                    "Equipment": {
-                        "Placeholder": "Search items"
-                    },
-                    "Effects": {
-                        "Placeholder": "Search effects"
-                    },
+                    "Placeholder": "Search {type}",
                     "Clear": "Clear Filters",
                     "Filter": "Filter By",
                     "SortManually": "Sort Manually",
