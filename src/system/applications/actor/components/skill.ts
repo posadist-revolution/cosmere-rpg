@@ -150,6 +150,28 @@ export class ActorSkillComponent extends HandlebarsApplicationComponent<
         // Get attribute config
         const attributeConfig = CONFIG.COSMERE.attributes[config.attribute];
 
+        // Determine where to place bonus pips
+        const bonusPipIndices = [];
+        if (skill.ranks.bonus !== 0) {
+            for (const idx of Array.fromRange(
+                skill.ranks.bonus,
+                skill.ranks.base,
+            )) {
+                bonusPipIndices.push(idx % 5);
+            }
+        }
+
+        // Lay out all pip-related information for handlebars
+        const pipsDetails = [];
+        for (const idx of Array.fromRange(5)) {
+            const details = {
+                active: skill.ranks.value > idx,
+                bonus: bonusPipIndices.includes(idx),
+                locked: idx >= maxSkillRank && !(skill.ranks.value > idx),
+            };
+            pipsDetails.push(details);
+        }
+
         return Promise.resolve({
             ...context,
 
@@ -163,6 +185,7 @@ export class ActorSkillComponent extends HandlebarsApplicationComponent<
 
             editable: !this.readonly,
             pips: this.pips,
+            pipsDetails: pipsDetails,
             bonus: this.bonus,
             maxSkillRank: maxSkillRank,
             legacyMode: getSystemSetting(SETTINGS.SHEET_SKILL_INCDEC_TOGGLE),

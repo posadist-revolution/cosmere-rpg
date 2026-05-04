@@ -21,19 +21,9 @@
             <div>
         {{/if}}
         <ul class="pip-list">
-            {{#each (numberRange skill.ranks.base)}}
-                <li class="pip active">
+            {{#each pipsDetails as |details|}}
+                <li class="pip {{#if details.active}}active{{/if}} {{#if details.bonus}}bonus{{/if}} {{#if details.locked}}locked{{/if}}">
                     <div {{#if ../editable}}data-action="adjust-skill-rank" data-index='{{@index}}'{{/if}}></div>
-                </li>
-            {{/each}}
-            {{#each (numberRange skill.ranks.bonus)}}
-                <li class="pip active bonus">
-                    <div data-action="adjust-skill-rank" data-index='{{add @index ../skill.ranks.base}}'></div>
-                </li>
-            {{/each}}
-            {{#each (numberRange (sub 5 (add skill.ranks.base skill.ranks.bonus)))}}
-                <li class="pip{{#if (gt (add (add @index 1) (add ../skill.ranks.bonus ../skill.ranks.base)) ../maxSkillRank)}} locked{{/if}}">
-                    <div {{#if ../editable}}data-action="adjust-skill-rank" data-index='{{add @index (add ../skill.ranks.bonus ../skill.ranks.base)}}'{{/if}}></div>
                 </li>
             {{/each}}
         </ul>
