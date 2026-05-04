@@ -286,9 +286,18 @@ function getSkillsSchema() {
                 nullable: false,
                 integer: true,
                 min: 0,
-                max: 5,
                 initial: 0,
             }),
+            ranks: new DerivedValueField(
+                new foundry.data.fields.NumberField({
+                    required: true,
+                    nullable: false,
+                    integer: true,
+                    min: 0,
+                    max: 10,
+                    initial: 0,
+                }),
+            ),
             mod: new DerivedValueField(
                 new foundry.data.fields.NumberField({
                     required: true,
@@ -570,6 +579,15 @@ export class CommonActorDataModel<
             // Set attribute
             this.skills[skill].attribute =
                 CONFIG.COSMERE.skills[skill].attribute;
+
+            // Skill bonus migration
+            // if(this.skills[skill].rank > this.skills[skill].ranks.derived){
+            //     this.skills[skill].ranks.derived = this.skills[skill].rank;
+            //     //TODO: Handle migrations for existing bonus rank flags
+            // }
+
+            // Derive rank value
+            this.skills[skill].rank = this.skills[skill].ranks.value;
 
             // Derive unlocked status for non-core skills
             if (!CONFIG.COSMERE.skills[skill].core) {

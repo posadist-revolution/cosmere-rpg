@@ -208,8 +208,12 @@
                 border-radius: 50%;
             }
 
-            &.active > div  {
+            &.active:not(.bonus) > div  {
                 background-color: var(--cosmere-color-text-main);
+            }
+
+            &.active.bonus > div  {
+                background-color: var(--cosmere-color-highlight);
             }
 
             &.locked > div  {
@@ -592,7 +596,7 @@
             padding: 0.125rem 0.25rem;
             border-radius: 6px;
             background-color: var(--cosmere-color-base-2);
-            
+
             display: flex;
             flex-direction: row;
             gap: 0.125rem;

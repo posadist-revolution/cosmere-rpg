@@ -25,6 +25,13 @@ type Params = {
     pips?: boolean;
 
     /**
+     * Whether to display any bonus rank pips
+     *
+     * @default true
+     */
+    bonus?: boolean;
+
+    /**
      * Whether the skill is read-only
      *
      * @default false
@@ -94,7 +101,7 @@ export class ActorSkillComponent extends HandlebarsApplicationComponent<
             ) as number;
             // Get current skill rank
             const currentRank: number =
-                this.application.actor.system.skills[skillId].rank;
+                this.application.actor.system.skills[skillId].ranks.base;
 
             // We want to increase or decrease based on the relative position of the clicked pip to the current rank
             const changeAmount: number = rankIndex + 1 - currentRank;
@@ -118,6 +125,10 @@ export class ActorSkillComponent extends HandlebarsApplicationComponent<
 
     public get pips() {
         return this.params?.pips !== false;
+    }
+
+    public get bonus() {
+        return this.params?.bonus !== false;
     }
 
     /* --- Context --- */
@@ -152,6 +163,7 @@ export class ActorSkillComponent extends HandlebarsApplicationComponent<
 
             editable: !this.readonly,
             pips: this.pips,
+            bonus: this.bonus,
             maxSkillRank: maxSkillRank,
             legacyMode: getSystemSetting(SETTINGS.SHEET_SKILL_INCDEC_TOGGLE),
         });

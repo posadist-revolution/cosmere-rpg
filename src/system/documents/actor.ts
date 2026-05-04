@@ -943,16 +943,28 @@ export class CosmereActor<
         const incrementBool = typeof param1 === 'boolean' ? param1 : true;
         const changeAmount = typeof param1 === 'number' ? param1 : 1;
 
-        const skillpath = `system.skills.${skillId}.rank`;
+        const skillpath = `system.skills.${skillId}.ranks.derived`;
         const skill = this.system.skills[skillId];
         if (incrementBool) {
             await this.update(
-                { [skillpath]: Math.clamp(skill.rank + changeAmount, 0, 5) },
+                {
+                    [skillpath]: Math.clamp(
+                        skill.ranks.derived + changeAmount,
+                        0,
+                        5,
+                    ),
+                },
                 { render },
             );
         } else {
             await this.update(
-                { [skillpath]: Math.clamp(skill.rank - changeAmount, 0, 5) },
+                {
+                    [skillpath]: Math.clamp(
+                        skill.ranks.derived - changeAmount,
+                        0,
+                        5,
+                    ),
+                },
                 { render },
             );
         }

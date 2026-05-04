@@ -272,7 +272,7 @@ export function characterMeetsPrerequisiteRule(
                 actor.system.attributes[prereq.attribute].value >= prereq.value
             );
         case TalentTree.Node.Prerequisite.Type.Skill:
-            return actor.system.skills[prereq.skill].rank >= prereq.rank;
+            return actor.system.skills[prereq.skill].ranks.base >= prereq.rank;
         case TalentTree.Node.Prerequisite.Type.Level:
             return actor.system.level >= prereq.level;
         case TalentTree.Node.Prerequisite.Type.Ancestry:

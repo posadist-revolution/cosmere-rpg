@@ -64,7 +64,7 @@ export function register() {
             // Set the skill rank
             await actor.update(
                 {
-                    [`system.skills.${this.skill}.rank`]: this.value,
+                    [`system.skills.${this.skill}.ranks.derived`]: this.value,
                 },
                 event.op,
             );

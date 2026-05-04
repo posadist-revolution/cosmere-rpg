@@ -116,8 +116,8 @@ async function assignStartingPath(
     foundry.utils.mergeObject(
         actorChanges,
         {
-            [`system.skills.${skillId}.rank`]:
-                actor.system.skills[skillId].rank + 1,
+            [`system.skills.${skillId}.ranks.derived`]:
+                actor.system.skills[skillId].ranks.derived + 1,
         },
         { inplace: true },
     );
@@ -138,8 +138,8 @@ async function unassignStartingPath(
     foundry.utils.mergeObject(
         actorChanges,
         {
-            [`system.skills.${skillId}.rank`]:
-                actor.system.skills[skillId].rank - 1,
+            [`system.skills.${skillId}.ranks.derived`]:
+                actor.system.skills[skillId].ranks.derived - 1,
         },
         { inplace: true },
     );
